@@ -1,0 +1,43 @@
+
+service: server
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-southeast-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:ap-southeast-1:*:*"
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  counter:
+    handler: bin/counterRead
+    events:
+      - http:
+          path: counter
+          method: get
+          cors: true
+          authorizer: aws_iam
+  counterIncrement:
+    handler: bin/counterIncrement
+    events:
+      - http:
+          path: counter
+          method: put
+          cors: true
+          authorizer: aws_iam
